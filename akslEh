@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>마니또 미션</title>
+<link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0d0d14;--surface:#16161f;--card:#1e1e2a;--border:#2a2a3a;--border2:#333348;--orange:#ff6b2b;--orange2:#ff9a5c;--teal:#00d4b4;--red:#ff4466;--green:#06d6a0;--text:#f0f0f8;--text2:#9898b8;--text3:#5a5a7a;--r-sm:10px;--r-md:16px;--r-lg:22px;--r-xl:28px;--sh:0 8px 32px rgba(0,0,0,.4)}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text);min-height:100dvh;overflow-x:hidden;position:relative}
+body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");background-size:256px;opacity:.5}
+.blob{position:fixed;border-radius:50%;filter:blur(80px);pointer-events:none;z-index:0;opacity:.1}
+.blob-1{width:400px;height:400px;background:var(--orange);top:-100px;right:-80px}
+.blob-2{width:350px;height:350px;background:var(--teal);bottom:-80px;left:-80px}
+.screen{display:none;position:relative;z-index:1;animation:fi .3s cubic-bezier(.22,1,.36,1)}
+.screen.active{display:block}
+@keyframes fi{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+#loading-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:14px;position:fixed;inset:0;z-index:999;background:var(--bg)}
+.spinner{width:38px;height:38px;border:3px solid var(--border);border-top-color:var(--orange);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+#loading-screen p{font-family:'Black Han Sans',sans-serif;color:var(--text3);font-size:.9rem}
+.topbar{position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:rgba(13,13,20,.88);backdrop-filter:blur(16px);border-bottom:1px solid var(--border)}
+.topbar-title{font-family:'Black Han Sans',sans-serif;font-size:1.05rem;color:var(--orange)}
+.topbar-sub{font-size:.68rem;color:var(--text3)}
+.back-btn{display:flex;align-items:center;gap:4px;background:none;border:none;color:var(--text2);cursor:pointer;font-family:'Noto Sans KR',sans-serif;font-size:.8rem;padding:6px 10px;border-radius:8px;transition:all .15s}
+.back-btn:hover{color:var(--orange);background:rgba(255,107,43,.08)}
+.page{max-width:480px;margin:0 auto;padding:22px 15px 96px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:19px;margin-bottom:13px;box-shadow:var(--sh)}
+.card-label{font-family:'Black Han Sans',sans-serif;font-size:.82rem;color:var(--orange);letter-spacing:.04em;margin-bottom:13px;display:flex;align-items:center;gap:5px}
+.field{margin-bottom:9px}
+.field label{display:block;font-size:.68rem;color:var(--text3);margin-bottom:4px;letter-spacing:.04em;text-transform:uppercase}
+input[type=text],input[type=password],textarea{width:100%;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r-sm);padding:11px 13px;color:var(--text);font-family:'Noto Sans KR',sans-serif;font-size:.88rem;outline:none;transition:border .2s,box-shadow .2s}
+input:focus,textarea:focus{border-color:var(--orange);box-shadow:0 0 0 3px rgba(255,107,43,.14)}
+textarea{resize:vertical;min-height:70px}
+::placeholder{color:var(--text3)}
+select{width:100%;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r-sm);padding:11px 13px;color:var(--text);font-family:'Noto Sans KR',sans-serif;font-size:.86rem;outline:none;cursor:pointer}
+select option{background:var(--surface)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:5px;padding:12px 18px;border:none;border-radius:var(--r-md);font-family:'Black Han Sans',sans-serif;font-size:.9rem;cursor:pointer;transition:all .17s;width:100%;letter-spacing:.02em}
+.btn:active{transform:scale(.96)}
+.btn-orange{background:linear-gradient(135deg,var(--orange),#ff9a5c);color:#fff;box-shadow:0 4px 16px rgba(255,107,43,.38)}
+.btn-orange:hover{box-shadow:0 5px 22px rgba(255,107,43,.52)}
+.btn-teal{background:linear-gradient(135deg,#009e88,var(--teal));color:#fff;box-shadow:0 4px 16px rgba(0,212,180,.28)}
+.btn-teal:hover{box-shadow:0 5px 22px rgba(0,212,180,.42)}
+.btn-ghost{background:transparent;border:1.5px solid var(--border2);color:var(--text2)}
+.btn-ghost:hover{border-color:var(--orange);color:var(--orange)}
+.btn-red{background:rgba(255,68,102,.11);border:1.5px solid rgba(255,68,102,.28);color:var(--red)}
+.btn-red:hover{background:rgba(255,68,102,.2)}
+.btn-sm{padding:7px 11px;font-size:.76rem;width:auto;border-radius:8px}
+.btn+.btn{margin-top:9px}
+.hero{text-align:center;padding:52px 18px 38px}
+.hero-badge{display:inline-block;background:rgba(255,107,43,.1);border:1px solid rgba(255,107,43,.22);border-radius:99px;padding:4px 13px;font-size:.72rem;color:var(--orange2);margin-bottom:18px;letter-spacing:.05em}
+.hero h1{font-family:'Black Han Sans',sans-serif;font-size:2.8rem;line-height:1.1;background:linear-gradient(135deg,#fff 30%,var(--orange2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:9px}
+.hero p{color:var(--text2);font-size:.88rem;line-height:1.7}
+.role-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.role-card{background:var(--card);border:1.5px solid var(--border);border-radius:var(--r-lg);padding:26px 13px;text-align:center;cursor:pointer;transition:all .2s}
+.role-card:hover{transform:translateY(-3px);box-shadow:var(--sh)}
+.role-card.s:hover{border-color:var(--orange)}
+.role-card.t:hover{border-color:var(--teal)}
+.rc-icon{font-size:2.2rem;margin-bottom:8px}
+.role-card h3{font-family:'Black Han Sans',sans-serif;font-size:1rem;margin-bottom:3px}
+.role-card p{font-size:.72rem;color:var(--text3);line-height:1.5}
+.login-wrap{max-width:340px;margin:36px auto 0}
+.login-icon{font-size:2.8rem;text-align:center;margin-bottom:5px}
+.login-title{font-family:'Black Han Sans',sans-serif;font-size:1.45rem;text-align:center;margin-bottom:3px}
+.login-sub{font-size:.78rem;color:var(--text3);text-align:center;margin-bottom:22px}
+.alert{padding:10px 13px;border-radius:9px;font-size:.8rem;line-height:1.5;margin-bottom:11px;border:1px solid;animation:fi .2s}
+.alert-error{background:rgba(255,68,102,.07);border-color:rgba(255,68,102,.26);color:#ff7799}
+.alert-success{background:rgba(6,214,160,.07);border-color:rgba(6,214,160,.26);color:var(--green)}
+.manitto-card{background:linear-gradient(135deg,#1a1230,#1e1228);border:1.5px solid rgba(255,107,43,.26);border-radius:var(--r-xl);padding:22px;text-align:center;margin-bottom:13px;position:relative;overflow:hidden;cursor:pointer;transition:border-color .2s,box-shadow .2s}
+.manitto-card:hover{border-color:rgba(255,107,43,.52);box-shadow:0 0 22px rgba(255,107,43,.2)}
+.manitto-card::before{content:'';position:absolute;top:-36px;left:50%;transform:translateX(-50%);width:180px;height:180px;background:radial-gradient(circle,rgba(255,107,43,.14),transparent 70%);pointer-events:none}
+.mc-tag{display:inline-flex;align-items:center;gap:3px;background:rgba(255,107,43,.1);border:1px solid rgba(255,107,43,.22);border-radius:99px;padding:2px 9px;font-size:.68rem;color:var(--orange2);margin-bottom:10px;letter-spacing:.04em}
+.mc-name{font-family:'Black Han Sans',sans-serif;font-size:1.9rem;color:#fff;transition:filter .3s}
+.mc-name.blurred{filter:blur(10px)}
+.mc-hint{font-size:.7rem;color:var(--text3);margin-top:6px}
+.mission-row{display:flex;align-items:flex-start;gap:10px;padding:12px 0;border-bottom:1px solid var(--border);transition:opacity .2s}
+.mission-row:last-child{border-bottom:none}
+.mission-row.done{opacity:.5}
+.mcheck{width:24px;height:24px;border-radius:50%;border:2px solid var(--border2);background:transparent;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.8rem;transition:all .2s;margin-top:1px}
+.mcheck.done{background:var(--green);border-color:var(--green);color:#fff}
+.mcheck:hover:not(.done){border-color:var(--orange)}
+.mission-body .mtitle{font-weight:700;font-size:.87rem}
+.mission-body .mdesc{font-size:.73rem;color:var(--text3);margin-top:2px;line-height:1.5}
+.mission-body.done .mtitle{text-decoration:line-through;color:var(--text3)}
+.prog-wrap{margin-top:14px}
+.prog-info{display:flex;justify-content:space-between;font-size:.7rem;color:var(--text3);margin-bottom:5px}
+.prog-info span:last-child{color:var(--orange);font-weight:700}
+.prog-track{background:var(--border);border-radius:99px;height:5px;overflow:hidden}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--orange),var(--teal));border-radius:99px;transition:width .5s cubic-bezier(.22,1,.36,1)}
+.tabs{display:flex;gap:3px;background:var(--surface);border-radius:var(--r-md);padding:3px;margin-bottom:15px;border:1px solid var(--border)}
+.tab-btn{flex:1;padding:9px 4px;border:none;background:none;font-family:'Black Han Sans',sans-serif;font-size:.76rem;color:var(--text3);cursor:pointer;border-radius:10px;transition:all .2s}
+.tab-btn.on{background:var(--card);color:var(--orange);box-shadow:0 2px 8px rgba(0,0,0,.3)}
+.tab-panel{display:none}
+.tab-panel.on{display:block;animation:fi .22s ease}
+.stu-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)}
+.stu-row:last-child{border-bottom:none}
+.stu-name{font-weight:700;font-size:.87rem}
+.stu-id{font-size:.7rem;color:var(--text3);margin-top:1px}
+.manitto-tag{display:inline-flex;align-items:center;gap:2px;background:rgba(255,107,43,.08);border:1px solid rgba(255,107,43,.18);color:var(--orange2);border-radius:99px;font-size:.65rem;padding:2px 7px;margin-top:3px;font-weight:700}
+.tmission-row{padding:13px 0;border-bottom:1px solid var(--border)}
+.tmission-row:last-child{border-bottom:none}
+.tmission-top{display:flex;justify-content:space-between;align-items:flex-start;gap:7px}
+.tm-title{font-weight:700;font-size:.87rem;margin-bottom:1px}
+.tm-desc{font-size:.73rem;color:var(--text3)}
+.tm-prog{font-size:.7rem;color:var(--teal);font-weight:700;margin-top:4px}
+.badge{display:inline-flex;align-items:center;background:rgba(255,107,43,.12);color:var(--orange);border:1px solid rgba(255,107,43,.22);border-radius:99px;font-size:.7rem;font-weight:700;padding:1px 7px;margin-left:5px}
+.stu-prog-row{margin-bottom:13px}
+.sp-header{display:flex;justify-content:space-between;font-size:.8rem;margin-bottom:5px}
+.sp-name{font-weight:700}
+.sp-count{color:var(--orange);font-weight:700}
+.match-tabs{display:flex;gap:6px;margin-bottom:13px}
+.match-tab-btn{flex:1;padding:9px;border:1.5px solid var(--border2);border-radius:10px;background:var(--surface);color:var(--text2);font-family:'Black Han Sans',sans-serif;font-size:.8rem;cursor:pointer;transition:all .2s}
+.match-tab-btn.on{background:var(--orange);color:#fff;border-color:var(--orange)}
+.danger-zone{background:rgba(255,68,102,.03);border:1.5px solid rgba(255,68,102,.18);border-radius:var(--r-lg);padding:17px;margin-bottom:13px}
+.danger-title{font-family:'Black Han Sans',sans-serif;font-size:.82rem;color:var(--red);margin-bottom:11px;display:flex;align-items:center;gap:5px}
+.reset-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:9px}
+.divider{height:1px;background:var(--border);margin:13px 0}
+.modal-overlay{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.72);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:18px;animation:fi .18s}
+.modal-overlay.hidden{display:none}
+.modal-box{background:var(--card);border:1.5px solid var(--border2);border-radius:var(--r-xl);padding:26px 22px;max-width:340px;width:100%}
+.modal-icon{font-size:2.3rem;text-align:center;margin-bottom:8px}
+.modal-title{font-family:'Black Han Sans',sans-serif;font-size:1.2rem;text-align:center;margin-bottom:5px}
+.modal-desc{font-size:.8rem;color:var(--text2);text-align:center;margin-bottom:22px;line-height:1.7}
+.sync-badge{display:inline-flex;align-items:center;gap:5px;font-size:.68rem;color:var(--text3);padding:3px 9px;border-radius:99px;border:1px solid var(--border)}
+.sync-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.empty{text-align:center;padding:28px 14px;color:var(--text3);font-size:.82rem}
+.empty .ei{font-size:2rem;margin-bottom:8px}
+</style>
+</head>
+<body>
+<div class="blob blob-1"></div>
+<div class="blob blob-2"></div>
+<div id="loading-screen"><div class="spinner"></div><p>연결 중...</p></div>
+<div class="modal-overlay hidden" id="modal">
+  <div class="modal-box">
+    <div class="modal-icon" id="modal-icon"></div>
+    <div class="modal-title" id="modal-title"></div>
+    <div class="modal-desc" id="modal-desc"></div>
+    <div style="display:flex;flex-direction:column;gap:9px">
+      <button class="btn btn-red" id="modal-confirm">확인</button>
+      <button class="btn btn-ghost" onclick="closeModal()">취소</button>
+    </div>
+  </div>
+</div>
+<div id="screen-home" class="screen">
+  <div class="page">
+    <div class="hero">
+      <div class="hero-badge">🎯 SECRET MISSION</div>
+      <h1>마니또<br>미션</h1>
+      <p>선생님이 만들고 학생이 수행하는<br>비밀 미션 프로젝트</p>
+    </div>
+    <div class="role-grid">
+      <div class="role-card s" onclick="goto('screen-student-login')"><div class="rc-icon">🎒</div><h3>학생</h3><p>미션 확인 &amp;<br>완료 체크</p></div>
+      <div class="role-card t" onclick="goto('screen-teacher-login')"><div class="rc-icon">👩‍🏫</div><h3>선생님</h3><p>미션 관리 &amp;<br>진척도 확인</p></div>
+    </div>
+  </div>
+</div>
+<div id="screen-student-login" class="screen">
+  <div class="topbar"><button class="back-btn" onclick="goto('screen-home')">← 뒤로</button><div class="topbar-title">학생 입장</div><span></span></div>
+  <div class="page"><div class="login-wrap">
+    <div class="login-icon">🎒</div><div class="login-title">학생으로 입장</div><div class="login-sub">학번과 이름을 입력하세요</div>
+    <div id="sl-alert"></div>
+    <div class="card">
+      <div class="field"><label>학번</label><input type="text" id="sl-id" placeholder="예) 2024001" maxlength="20"></div>
+      <div class="field"><label>이름</label><input type="text" id="sl-name" placeholder="이름을 입력하세요"></div>
+      <button class="btn btn-orange" onclick="studentLogin()">입장하기</button>
+    </div>
+  </div></div>
+</div>
+<div id="screen-student-dash" class="screen">
+  <div class="topbar">
+    <button class="back-btn" onclick="goto('screen-home')">← 나가기</button>
+    <div><div class="topbar-title" id="sd-name">--</div><div class="topbar-sub" id="sd-id">--</div></div>
+    <div class="sync-badge"><div class="sync-dot"></div>실시간</div>
+  </div>
+  <div class="page">
+    <div class="manitto-card" onclick="revealManitto()">
+      <div class="mc-tag">🎯 내 마니또</div>
+      <div class="mc-name blurred" id="mc-name">???</div>
+      <div class="mc-hint" id="mc-hint">탭해서 마니또 확인하기</div>
+    </div>
+    <div class="card">
+      <div class="card-label">✅ 미션 목록</div>
+      <div id="sd-missions"><div class="empty"><div class="ei">📭</div>아직 미션이 없어요</div></div>
+      <div id="sd-prog-wrap" style="display:none">
+        <div class="divider"></div>
+        <div class="prog-wrap">
+          <div class="prog-info"><span>진척도</span><span id="sd-prog-txt">0 / 0</span></div>
+          <div class="prog-track"><div class="prog-fill" id="sd-prog-fill" style="width:0%"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div id="screen-teacher-login" class="screen">
+  <div class="topbar"><button class="back-btn" onclick="goto('screen-home')">← 뒤로</button><div class="topbar-title">선생님 입장</div><span></span></div>
+  <div class="page"><div class="login-wrap">
+    <div class="login-icon">👩‍🏫</div><div class="login-title">선생님으로 입장</div><div class="login-sub">관리자 비밀번호를 입력하세요</div>
+    <div id="tl-alert"></div>
+    <div class="card">
+      <div class="field"><label>비밀번호</label><input type="password" id="tl-pw" placeholder="비밀번호 입력"></div>
+      <button class="btn btn-teal" onclick="teacherLogin()">로그인</button>
+    </div>
+  </div></div>
+</div>
+<div id="screen-teacher-dash" class="screen">
+  <div class="topbar">
+    <button class="back-btn" onclick="goto('screen-home')">← 나가기</button>
+    <div class="topbar-title">👩‍🏫 관리자</div>
+    <div class="sync-badge"><div class="sync-dot"></div>실시간</div>
+  </div>
+  <div class="page">
+    <div class="tabs">
+      <button class="tab-btn on" onclick="switchTab(this,'tp-students')">학생</button>
+      <button class="tab-btn"    onclick="switchTab(this,'tp-missions')">미션</button>
+      <button class="tab-btn"    onclick="switchTab(this,'tp-progress')">진척도</button>
+      <button class="tab-btn"    onclick="switchTab(this,'tp-reset')">초기화</button>
+    </div>
+    <div class="tab-panel on" id="tp-students">
+      <div class="card">
+        <div class="card-label">👥 등록된 학생 <span class="badge" id="t-stu-count">0</span></div>
+        <div id="t-stu-list"><div class="empty"><div class="ei">🙈</div>등록된 학생이 없어요</div></div>
+      </div>
+      <div class="card">
+        <div class="card-label">🎯 마니또 배정</div>
+        <div class="match-tabs">
+          <button class="match-tab-btn on" id="mtab-random" onclick="switchMatchTab('random')">🔀 랜덤 배정</button>
+          <button class="match-tab-btn"    id="mtab-manual" onclick="switchMatchTab('manual')">✏️ 직접 배정</button>
+        </div>
+        <div id="match-panel-random"><button class="btn btn-orange" onclick="doMatch()">🔀 랜덤 마니또 배정하기</button></div>
+        <div id="match-panel-manual" style="display:none"><div id="manual-match-list"><div class="empty"><div class="ei">👥</div>학생을 먼저 등록해주세요</div></div></div>
+      </div>
+    </div>
+    <div class="tab-panel" id="tp-missions">
+      <div class="card">
+        <div class="card-label">➕ 새 미션 추가</div>
+        <div class="field"><label>미션 이름 *</label><input type="text" id="nm-title" placeholder="예) 몰래 칭찬 쪽지 전달하기"></div>
+        <div class="field"><label>설명 (선택)</label><textarea id="nm-desc" placeholder="미션 설명을 입력하세요"></textarea></div>
+        <button class="btn btn-orange" onclick="addMission()">미션 추가</button>
+      </div>
+      <div class="card">
+        <div class="card-label">📋 미션 목록 <span class="badge" id="t-mis-count">0</span></div>
+        <div id="t-mis-list"><div class="empty"><div class="ei">📭</div>미션을 추가해보세요</div></div>
+      </div>
+    </div>
+    <div class="tab-panel" id="tp-progress">
+      <div class="card">
+        <div class="card-label">📊 학생별 진척도</div>
+        <div id="t-progress"><div class="empty"><div class="ei">📊</div>학생과 미션이 있어야 표시돼요</div></div>
+      </div>
+    </div>
+    <div class="tab-panel" id="tp-reset">
+      <div class="danger-zone">
+        <div class="danger-title">⚠️ 데이터 초기화</div>
+        <div class="reset-grid">
+          <button class="btn btn-red btn-sm" style="width:100%;padding:11px" onclick="resetConfirm('checks')">✅ 미션 체크 초기화</button>
+          <button class="btn btn-red btn-sm" style="width:100%;padding:11px" onclick="resetConfirm('matching')">🎯 마니또 배정 초기화</button>
+          <button class="btn btn-red btn-sm" style="width:100%;padding:11px" onclick="resetConfirm('missions')">📋 미션 목록 삭제</button>
+          <button class="btn btn-red btn-sm" style="width:100%;padding:11px" onclick="resetConfirm('students')">👥 학생 목록 삭제</button>
+        </div>
+        <div class="divider"></div>
+        <button class="btn btn-red" onclick="resetConfirm('all')">🗑️ 전체 데이터 완전 초기화</button>
+      </div>
+      <div id="tp-reset-alert"></div>
+      <p style="font-size:.72rem;color:var(--text3);text-align:center;line-height:1.8">초기화는 되돌릴 수 없어요.<br>새 학기나 새 라운드 시작 전에 사용하세요.</p>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, doc, setDoc, onSnapshot, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const app = initializeApp({
+  apiKey:"AIzaSyDRP4XOIHPn8gegHUEWhIA_u5othz-OwuA",
+  authDomain:"manitto-cb1f2.firebaseapp.com",
+  projectId:"manitto-cb1f2",
+  storageBucket:"manitto-cb1f2.firebasestorage.app",
+  messagingSenderId:"761781006989",
+  appId:"1:761781006989:web:e362d8bd3f1fe761d128c4"
+});
+const db = getFirestore(app);
+const ref = k => doc(db,'manitto',k);
+const save = (k,v) => setDoc(ref(k),{value:v});
+const del  = k => deleteDoc(ref(k));
+
+let S = {students:[],missions:[],checks:{},matching:{}};
+let loaded = {students:false,missions:false,checks:false,matching:false};
+let curStudent = null, revealed = false;
+const PW = 'teacher1234';
+
+function checkLoaded(){
+  if(Object.values(loaded).every(Boolean)){
+    document.getElementById('loading-screen').style.display='none';
+    goto('screen-home');
+  }
+}
+
+['students','missions','checks','matching'].forEach(k=>{
+  onSnapshot(ref(k), snap=>{
+    S[k] = snap.exists() ? snap.data().value : ((k==='students'||k==='missions')?[]:{});
+    loaded[k]=true; checkLoaded(); refreshScreen();
+  });
+});
+
+function refreshScreen(){
+  const a=document.querySelector('.screen.active'); if(!a)return;
+  if(a.id==='screen-student-dash'&&curStudent) renderStudentDash();
+  if(a.id==='screen-teacher-dash'){
+    const p=document.querySelector('.tab-panel.on'); if(!p)return;
+    if(p.id==='tp-students') renderStudentList();
+    if(p.id==='tp-missions') renderMissionList();
+    if(p.id==='tp-progress') renderProgress();
+  }
+}
+
+window.goto=id=>{document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');window.scrollTo({top:0,behavior:'instant'})};
+window.switchTab=(btn,pid)=>{document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('on'));document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('on'));btn.classList.add('on');document.getElementById(pid).classList.add('on');if(pid==='tp-progress')renderProgress();if(pid==='tp-students')renderStudentList();if(pid==='tp-missions')renderMissionList()};
+
+const showAlert=(id,msg,t='error')=>document.getElementById(id).innerHTML=`<div class="alert alert-${t}">${msg}</div>`;
+const clearAlert=id=>document.getElementById(id).innerHTML='';
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+
+window.studentLogin=async()=>{
+  const sid=document.getElementById('sl-id').value.trim(), sname=document.getElementById('sl-name').value.trim();
+  if(!sid||!sname){showAlert('sl-alert','학번과 이름을 모두 입력해주세요!');return}
+  const ex=S.students.find(s=>s.id===sid);
+  if(ex){if(ex.name!==sname){showAlert('sl-alert','이름이 맞지 않아요. 다시 확인해주세요.');return}}
+  else{S.students.push({id:sid,name:sname});await save('students',S.students)}
+  curStudent={id:sid,name:sname}; revealed=false; clearAlert('sl-alert'); renderStudentDash(); goto('screen-student-dash');
+};
+
+function renderStudentDash(){
+  if(!curStudent)return;
+  document.getElementById('sd-name').textContent=curStudent.name;
+  document.getElementById('sd-id').textContent='학번 '+curStudent.id;
+  const myMId=S.matching[curStudent.id], myM=S.students.find(s=>s.id===myMId);
+  const ne=document.getElementById('mc-name'), he=document.getElementById('mc-hint');
+  if(myM){ne.textContent=revealed?myM.name:'???';ne.className='mc-name'+(revealed?'':' blurred');he.textContent=revealed?'✨ 소중히 대해줘요!':'탭해서 마니또 확인하기'}
+  else{ne.textContent='미배정';ne.className='mc-name';he.textContent='선생님이 아직 배정하지 않았어요'}
+  const myC=S.checks[curStudent.id]||[], ms=S.missions;
+  const le=document.getElementById('sd-missions'), pw=document.getElementById('sd-prog-wrap');
+  if(!ms.length){le.innerHTML='<div class="empty"><div class="ei">📭</div>아직 미션이 없어요</div>';pw.style.display='none';return}
+  pw.style.display='block';
+  le.innerHTML=ms.map(m=>{const d=myC.includes(m.id);return`<div class="mission-row ${d?'done':''}"><div class="mcheck ${d?'done':''}" onclick="toggleCheck('${m.id}')">${d?'✓':''}</div><div class="mission-body ${d?'done':''}"><div class="mtitle">${esc(m.title)}</div>${m.desc?`<div class="mdesc">${esc(m.desc)}</div>`:''}</div></div>`}).join('');
+  const done=myC.filter(id=>ms.find(m=>m.id===id)).length, total=ms.length;
+  document.getElementById('sd-prog-txt').textContent=`${done} / ${total}`;
+  document.getElementById('sd-prog-fill').style.width=total?(done/total*100)+'%':'0%';
+}
+window.revealManitto=()=>{if(!S.matching[curStudent?.id])return;revealed=true;renderStudentDash()};
+window.toggleCheck=async mid=>{const cur=S.checks[curStudent.id]||[];const next=cur.includes(mid)?cur.filter(x=>x!==mid):[...cur,mid];S.checks[curStudent.id]=next;await save('checks',S.checks);renderStudentDash()};
+
+window.teacherLogin=()=>{if(document.getElementById('tl-pw').value!==PW){showAlert('tl-alert','비밀번호가 틀렸어요!');return}clearAlert('tl-alert');renderStudentList();renderMissionList();goto('screen-teacher-dash')};
+
+function renderStudentList(){
+  const {students,matching}=S;
+  document.getElementById('t-stu-count').textContent=students.length;
+  const el=document.getElementById('t-stu-list');
+  if(!students.length){el.innerHTML='<div class="empty"><div class="ei">🙈</div>등록된 학생이 없어요</div>';return}
+  el.innerHTML=students.map(s=>{const mn=students.find(x=>x.id===matching[s.id])?.name;return`<div class="stu-row"><div><div class="stu-name">${esc(s.name)}</div><div class="stu-id">학번 ${esc(s.id)}</div>${mn?`<div class="manitto-tag">🎯 → ${esc(mn)}</div>`:''}</div><button class="btn btn-red btn-sm" onclick="deleteStudent('${esc(s.id)}')">삭제</button></div>`}).join('');
+}
+window.deleteStudent=id=>openModal('👤','이 학생을 삭제할까요?','체크 기록과 마니또 배정도 함께 삭제돼요.',async()=>{
+  S.students=S.students.filter(s=>s.id!==id); delete S.matching[id];
+  Object.keys(S.matching).forEach(k=>{if(S.matching[k]===id)delete S.matching[k]}); delete S.checks[id];
+  await Promise.all([save('students',S.students),save('matching',S.matching),save('checks',S.checks)]); renderStudentList();
+});
+
+window.switchMatchTab=type=>{
+  document.getElementById('match-panel-random').style.display=type==='random'?'block':'none';
+  document.getElementById('match-panel-manual').style.display=type==='manual'?'block':'none';
+  document.getElementById('mtab-random').classList.toggle('on',type==='random');
+  document.getElementById('mtab-manual').classList.toggle('on',type==='manual');
+  if(type==='manual')renderManualMatchList();
+};
+function renderManualMatchList(){
+  const {students,matching}=S, el=document.getElementById('manual-match-list');
+  if(students.length<2){el.innerHTML='<div class="empty"><div class="ei">👥</div>학생이 2명 이상이어야 해요</div>';return}
+  if(!window._tm)window._tm={...matching};
+  el.innerHTML=students.map(s=>{const cur=window._tm[s.id]||'';const opts=students.filter(x=>x.id!==s.id).map(x=>`<option value="${esc(x.id)}"${cur===x.id?' selected':''}>${esc(x.name)} (${esc(x.id)})</option>`).join('');return`<div style="margin-bottom:10px"><div style="font-size:.75rem;color:var(--text3);margin-bottom:4px;font-weight:700">${esc(s.name)} <span style="font-weight:400">의 마니또</span></div><select onchange="setMM('${esc(s.id)}',this.value)"><option value="">-- 미배정 --</option>${opts}</select></div>`}).join('')+`<div id="mm-msg"></div><button class="btn btn-teal" style="margin-top:6px" onclick="saveMM()">💾 배정 저장하기</button>`;
+}
+window.setMM=(f,t)=>{if(!window._tm)window._tm={...S.matching};if(t)window._tm[f]=t;else delete window._tm[f]};
+window.saveMM=async()=>{if(!window._tm)return;S.matching={...window._tm};window._tm=null;await save('matching',S.matching);renderStudentList();const m=document.getElementById('mm-msg');if(m){m.innerHTML='<div class="alert alert-success" style="margin-top:8px">✅ 저장됐어요!</div>';setTimeout(()=>m.innerHTML='',1800)}};
+window.doMatch=()=>{
+  if(S.students.length<2){alert('학생이 2명 이상이어야 해요!');return}
+  openModal('🎯','랜덤 마니또 배정','기존 배정이 초기화되고 새로 배정돼요.',async()=>{
+    const ids=S.students.map(s=>s.id); let sh,t=0;
+    do{sh=[...ids].sort(()=>Math.random()-.5);t++}while(ids.some((id,i)=>id===sh[i])&&t<200);
+    const m={};ids.forEach((id,i)=>m[id]=sh[i]); S.matching=m; await save('matching',m); renderStudentList();
+  });
+};
+
+function renderMissionList(){
+  const {missions,students,checks}=S;
+  document.getElementById('t-mis-count').textContent=missions.length;
+  const el=document.getElementById('t-mis-list');
+  if(!missions.length){el.innerHTML='<div class="empty"><div class="ei">📭</div>미션을 추가해보세요</div>';return}
+  el.innerHTML=missions.map(m=>{const dn=students.filter(s=>(checks[s.id]||[]).includes(m.id)).length;return`<div class="tmission-row"><div class="tmission-top"><div style="flex:1"><div class="tm-title">${esc(m.title)}</div>${m.desc?`<div class="tm-desc">${esc(m.desc)}</div>`:''}<div class="tm-prog">✅ ${dn} / ${students.length}명 완료</div></div><button class="btn btn-red btn-sm" onclick="deleteMission('${m.id}')">삭제</button></div></div>`}).join('');
+}
+window.addMission=async()=>{const t=document.getElementById('nm-title').value.trim(),d=document.getElementById('nm-desc').value.trim();if(!t){alert('미션 이름을 입력해주세요!');return}S.missions.push({id:'m'+Date.now(),title:t,desc:d});await save('missions',S.missions);document.getElementById('nm-title').value='';document.getElementById('nm-desc').value='';renderMissionList()};
+window.deleteMission=id=>openModal('📋','이 미션을 삭제할까요?','학생들의 완료 체크도 함께 삭제돼요.',async()=>{
+  S.missions=S.missions.filter(m=>m.id!==id);
+  Object.keys(S.checks).forEach(sid=>{S.checks[sid]=(S.checks[sid]||[]).filter(mid=>mid!==id)});
+  await Promise.all([save('missions',S.missions),save('checks',S.checks)]); renderMissionList();
+});
+
+function renderProgress(){
+  const {students,missions,checks}=S, el=document.getElementById('t-progress');
+  if(!students.length||!missions.length){el.innerHTML='<div class="empty"><div class="ei">📊</div>학생과 미션이 있어야 표시돼요</div>';return}
+  el.innerHTML=students.map(s=>{const my=(checks[s.id]||[]).filter(id=>missions.find(m=>m.id===id)).length;const pct=Math.round(my/missions.length*100);return`<div class="stu-prog-row"><div class="sp-header"><span class="sp-name">${esc(s.name)} <span style="color:var(--text3);font-size:.68rem;font-weight:400">학번 ${esc(s.id)}</span></span><span class="sp-count">${my} / ${missions.length}</span></div><div class="prog-track"><div class="prog-fill" style="width:${pct}%"></div></div></div>`}).join('');
+}
+
+const RC={checks:{icon:'✅',title:'미션 체크 초기화',desc:'모든 학생의 완료 기록이 삭제돼요.\n학생 목록과 미션은 유지돼요.'},matching:{icon:'🎯',title:'마니또 배정 초기화',desc:'마니또 배정 정보가 모두 삭제돼요.'},missions:{icon:'📋',title:'미션 목록 삭제',desc:'모든 미션과 체크 기록이 삭제돼요.'},students:{icon:'👥',title:'학생 목록 삭제',desc:'모든 학생 데이터가 삭제돼요.\n체크와 마니또도 함께 삭제돼요.'},all:{icon:'🗑️',title:'전체 완전 초기화',desc:'학생, 미션, 마니또, 체크 기록\n모든 데이터가 삭제돼요.'}};
+window.resetConfirm=type=>openModal(RC[type].icon,RC[type].title,RC[type].desc,async()=>{
+  if(type==='checks'){S.checks={};await save('checks',{})}
+  if(type==='matching'){S.matching={};await save('matching',{})}
+  if(type==='missions'){S.missions=[];Object.keys(S.checks).forEach(k=>S.checks[k]=[]);await Promise.all([save('missions',[]),save('checks',S.checks)])}
+  if(type==='students'){S.students=[];S.matching={};S.checks={};await Promise.all([save('students',[]),save('matching',{}),save('checks',{})])}
+  if(type==='all'){S={students:[],missions:[],checks:{},matching:{}};await Promise.all(['students','missions','checks','matching'].map(k=>del(k)))}
+  renderStudentList();renderMissionList();renderProgress();
+  showAlert('tp-reset-alert','✅ 초기화 완료!','success');setTimeout(()=>clearAlert('tp-reset-alert'),2500);
+});
+
+window.openModal=(icon,title,desc,onConfirm)=>{
+  document.getElementById('modal-icon').textContent=icon;
+  document.getElementById('modal-title').textContent=title;
+  document.getElementById('modal-desc').innerHTML=desc.replace(/\n/g,'<br>');
+  document.getElementById('modal-confirm').onclick=()=>{onConfirm();closeModal()};
+  document.getElementById('modal').classList.remove('hidden');
+};
+window.closeModal=()=>document.getElementById('modal').classList.add('hidden');
+document.getElementById('modal').addEventListener('click',e=>{if(e.target===document.getElementById('modal'))closeModal()});
+document.addEventListener('keydown',e=>{if(e.key!=='Enter')return;const a=document.querySelector('.screen.active');if(!a)return;if(a.id==='screen-student-login')studentLogin();if(a.id==='screen-teacher-login')teacherLogin()});
+</script>
+</body>
+</html>
